@@ -1,0 +1,109 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later
+     Copyright (C) 2026 BOBI SAS, France
+     Auteur : Cyril Mazouer, pour le compte de BOBI SAS
+     Distribué sous licence GNU GPL v3 (ou ultérieure) ; voir le fichier LICENSE. -->
+<div class="np-root">
+
+  <div class="np-head">
+    <div class="np-tallies" id="np-tallies"></div>
+    <div class="np-head-actions">
+      <button class="btn btn-sm" id="np-add" data-i18n="plugin.nmos_parc.add">+ Déclarer</button>
+      <button class="btn btn-sm btn-blue" id="np-refresh" data-i18n="plugin.nmos_parc.refresh">Sonder</button>
+    </div>
+  </div>
+
+  <!-- Reprise de l'existant. N'apparaît que pour les outils dont l'inventaire n'a pas
+       encore été repris : c'est une action de migration, pas une fonction permanente. -->
+  <div class="alert alert-info np-import" id="np-import" hidden>
+    <div>
+      <b data-i18n="plugin.nmos_parc.importTitle">Reprendre les inventaires existants</b>
+      <p data-i18n="plugin.nmos_parc.importHint">
+        Les équipements déjà déclarés dans les autres outils NMOS peuvent être repris ici
+        sans ressaisie, en conservant leurs identités : les salvos, instantanés et
+        sauvegardes enregistrés continuent de fonctionner. Rien n'est modifié chez eux.
+      </p>
+      <p class="np-sub" id="np-import-list"></p>
+    </div>
+    <button class="btn btn-sm btn-green" id="np-import-btn" data-i18n="plugin.nmos_parc.importBtn">Reprendre</button>
+  </div>
+
+  <!-- Déclaration. Trois types, dont deux qui n'ont pas les mêmes champs : le formulaire
+       s'adapte plutôt que d'afficher des champs sans objet. -->
+  <form class="np-form" id="np-form" hidden>
+    <label>
+      <span data-i18n="plugin.nmos_parc.f.kind">Type</span>
+      <select id="np-f-kind">
+        <option value="registry" data-i18n="plugin.nmos_parc.f.registry">Registre (Query API)</option>
+        <option value="node" data-i18n="plugin.nmos_parc.f.node">Node isolé</option>
+        <option value="machine" data-i18n="plugin.nmos_parc.f.machine">Machine multi-nodes</option>
+      </select>
+    </label>
+    <label>
+      <span data-i18n="plugin.nmos_parc.f.name">Nom</span>
+      <input type="text" id="np-f-name" autocomplete="off">
+    </label>
+    <label>
+      <span data-i18n="plugin.nmos_parc.f.host">Adresse</span>
+      <input type="text" id="np-f-host" autocomplete="off" required>
+    </label>
+    <label id="np-f-port-wrap">
+      <span data-i18n="plugin.nmos_parc.f.port">Port</span>
+      <input type="number" id="np-f-port" value="80" min="1" max="65535">
+    </label>
+    <label id="np-f-tpl-wrap" hidden>
+      <span data-i18n="plugin.nmos_parc.f.template">Gabarit</span>
+      <select id="np-f-template"></select>
+    </label>
+    <div class="np-form-actions">
+      <button type="submit" class="btn btn-sm btn-green" data-i18n="plugin.nmos_parc.save">Déclarer</button>
+      <button type="button" class="btn btn-sm" id="np-f-cancel" data-i18n="plugin.nmos_parc.cancel">Annuler</button>
+    </div>
+    <p class="np-hint" id="np-f-hint"></p>
+  </form>
+
+  <!-- Sources déclarées : ce que l'opérateur a saisi. -->
+  <section class="np-panel">
+    <div class="np-panel-head">
+      <h3 data-i18n="plugin.nmos_parc.sources">Sources déclarées</h3>
+      <span class="np-sub" id="np-updated"></span>
+    </div>
+    <div id="np-sources"></div>
+  </section>
+
+  <!-- Parc résolu : ce que ça donne réellement, un point d'entrée par ligne. C'est
+       exactement le contenu publié aux autres outils. -->
+  <section class="np-panel">
+    <div class="np-panel-head">
+      <h3 data-i18n="plugin.nmos_parc.park">Parc publié</h3>
+      <label class="np-filter">
+        <input type="checkbox" id="np-only-down">
+        <span data-i18n="plugin.nmos_parc.onlyDown">Injoignables seulement</span>
+      </label>
+    </div>
+    <div class="np-table-wrap">
+      <table class="np-table">
+        <thead>
+          <tr>
+            <th data-i18n="plugin.nmos_parc.c.entry">Point d'entrée</th>
+            <th data-i18n="plugin.nmos_parc.c.address">Adresse</th>
+            <th data-i18n="plugin.nmos_parc.c.kind">Type</th>
+            <th data-i18n="plugin.nmos_parc.c.state">État</th>
+            <th data-i18n="plugin.nmos_parc.c.seen">Vu</th>
+          </tr>
+        </thead>
+        <tbody id="np-tbody"></tbody>
+      </table>
+    </div>
+    <div class="np-empty" id="np-empty" hidden></div>
+  </section>
+
+  <!-- Détail IS-04 d'un point d'entrée, à la demande. -->
+  <section class="np-panel" id="np-detail" hidden>
+    <div class="np-panel-head">
+      <h3 id="np-detail-title"></h3>
+      <button class="btn btn-sm btn-ghost-icon" id="np-detail-close" title="Fermer">✕</button>
+    </div>
+    <div id="np-detail-body"></div>
+  </section>
+
+</div>

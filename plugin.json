@@ -1,0 +1,46 @@
+{
+  "license": "GPL-3.0-or-later",
+  "type": "nmos_parc",
+  "label": "Parc NMOS",
+  "version": "0.2.0",
+  "runtime": "docker",
+  "description": "Propriétaire du parc NMOS : la source de vérité unique des équipements IS-04 du site. Trois façons de déclarer — un registre (Query API), un node isolé, ou une machine multi-nodes avec son gabarit d'expansion (un node par cage SFP). Sonde la joignabilité, résout le parc (devices, senders, receivers) et le PUBLIE dans son volume, monté en lecture seule par les outils NMOS. Remplace la dérivation « un node par cage » aujourd'hui recopiée dans chaque outil consommateur.",
+  "badge": {
+    "label": "PARC",
+    "class": "tool-nmosparc",
+    "oklch": "0.76 0.12 130"
+  },
+  "nav": {
+    "section": "reseau",
+    "label": "Réseau",
+    "order": 14
+  },
+  "ui": {
+    "page_html": "page.html",
+    "page_js": "page.js",
+    "page_css": "page.css"
+  },
+  "docker": {
+    "image": "bobitool-nmos_parc:0.2.0",
+    "build": true,
+    "port": 8080,
+    "volume": "/data",
+    "shared_volumes": [
+      {
+        "volume": "bobitool-bmd_nmos-data",
+        "mount": "/bmd",
+        "ro": true
+      },
+      {
+        "volume": "bobitool-nmos_grid-data",
+        "mount": "/legacy/grid",
+        "ro": true
+      },
+      {
+        "volume": "bobitool-nmos_diag-data",
+        "mount": "/legacy/diag",
+        "ro": true
+      }
+    ]
+  }
+}

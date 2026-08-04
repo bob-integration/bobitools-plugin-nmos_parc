@@ -1,0 +1,26 @@
+{
+  "current": "0.1.0",
+  "versions": [
+    {
+      "version": "0.1.0",
+      "published_at": "2026-08-04",
+      "changes": [
+        "Propriétaire du parc NMOS : source de vérité unique des équipements IS-04, publiée dans son volume et consommée en lecture seule par les autres outils NMOS",
+        "Trois modes de déclaration : registre (Query API), node isolé, machine multi-nodes avec gabarit d'expansion",
+        "L'expansion « un node par cage SFP » remonte ici : elle était recopiée à l'identique dans nmos_grid, nmos_diag, ptp_watch et config_backup",
+        "Sondage périodique de joignabilité (60 s, 16 sondes simultanées au plus), libellé repris de /self, distinction « jamais vu » / « était là »",
+        "Contrat publié versionné (park.json v1) : sources + vue nodes, écriture atomique, les injoignables restent publiés",
+        "Reprise sans ressaisie du parc « Convertisseurs Blackmagic » — lecture seule, une seule fois, rien n'est modifié chez lui",
+        "Détail IS-04 à la demande, avec repérage des Devices exposant le contrôle IS-12 (supervision BCP-008 possible)",
+        "Banc d'essai embarqué (tests/) exécuté dans l'image du plugin"
+      ],
+      "fixes": [],
+      "known_bugs": [
+        "Le gabarit « auto » publie la borne haute (16 nodes) et laisse le sondage marquer les cages vides : la vraie auto-découverte par scan n'est pas encore faite",
+        "nmos_grid, nmos_diag, ptp_watch, config_backup et bmd_nmos ne sont pas encore migrés : ils gardent pour l'instant leur propre liste",
+        "Le montage /bmd est transitoire — il disparaîtra quand bmd_nmos sera devenu consommateur du parc",
+        "Pas de découverte DNS-SD"
+      ]
+    }
+  ]
+}

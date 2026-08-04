@@ -1,0 +1,100 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later
+   Styles de l'outil « Parc NMOS », préfixe .np-*.
+   Uniquement des variables de thème du socle — aucune couleur littérale. */
+
+.np-root { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Bandeau ─────────────────────────────────────────────────────── */
+.np-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.np-tallies { display: flex; gap: 8px; flex: 1; flex-wrap: wrap; min-width: 0; }
+.np-head-actions { display: flex; gap: 8px; }
+
+.np-tally {
+    display: flex; align-items: baseline; gap: 6px;
+    padding: 6px 12px; border-radius: var(--radius); border: 1px solid var(--border);
+}
+.np-tally-n { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.np-tally-l { font-size: 12px; opacity: 0.85; }
+.np-tally-zero { opacity: 0.45; }
+.np-tally.np-ok  { border-color: var(--status-running-fg); color: var(--status-running-fg); }
+.np-tally.np-bad { border-color: var(--status-stopped-fg); color: var(--status-stopped-fg); }
+.np-tally.np-neutral { border-color: var(--border); color: var(--text-muted); }
+
+/* ── Bandeau de reprise ──────────────────────────────────────────── */
+.np-import { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.np-import p { margin: 4px 0 0; font-size: 12px; opacity: 0.9; }
+
+/* ── Panneaux ────────────────────────────────────────────────────── */
+.np-panel {
+    background: var(--bg-elev); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: var(--card-padding, 14px);
+}
+.np-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.np-panel-head h3 { margin: 0; font-size: 14px; }
+.np-hint { color: var(--text-muted); font-size: 12px; margin: 4px 0; }
+.np-sub { color: var(--text-muted); font-size: 12px; }
+.np-mono { font-family: var(--font-mono, monospace); font-size: 12px; }
+.np-empty { color: var(--text-muted); font-size: 13px; padding: 18px 4px; text-align: center; }
+.np-filter { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+
+/* ── Formulaire ──────────────────────────────────────────────────── */
+.np-form {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+    background: var(--bg-soft); border: 1px solid var(--border);
+    padding: 12px; border-radius: var(--radius);
+}
+.np-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.np-form-actions { display: flex; gap: 8px; }
+.np-form .np-hint { flex-basis: 100%; margin: 0; }
+
+/* ── Sources déclarées ───────────────────────────────────────────── */
+.np-source {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--border-soft, var(--border));
+}
+.np-source:last-child { border-bottom: none; }
+.np-source-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.np-chip {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px;
+    padding: 2px 7px; border-radius: 3px; border: 1px solid var(--border);
+    color: var(--text-muted); white-space: nowrap;
+}
+/* Le registre est le mode à privilégier : il se distingue visuellement des deux autres. */
+.np-chip-registry { border-color: var(--accent); color: var(--accent); }
+
+.np-origin {
+    font-size: 10px; color: var(--text-muted); border: 1px dashed var(--border);
+    border-radius: 3px; padding: 1px 5px; margin-left: 4px;
+}
+
+/* ── Table du parc ───────────────────────────────────────────────── */
+.np-table-wrap { overflow-x: auto; }
+.np-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.np-table th {
+    text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.4px; color: var(--text-muted);
+    padding: 6px 10px; border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.np-table td { padding: 7px 10px; border-bottom: 1px solid var(--border-soft, var(--border)); vertical-align: top; }
+.np-table tbody tr { cursor: pointer; }
+.np-table tbody tr:hover { background: var(--bg-hover); }
+.np-row-sel { background: var(--bg-selected); }
+
+.np-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.np-badge.np-ok  { background: var(--status-running-bg); color: var(--status-running-fg); }
+.np-badge.np-bad { background: var(--status-stopped-bg); color: var(--status-stopped-fg); }
+
+/* ── Détail ──────────────────────────────────────────────────────── */
+.np-d-block { margin-top: 12px; }
+.np-d-block h4 { margin: 0 0 4px; font-size: 12px; color: var(--text-muted); }
+.np-d-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.np-d-list li { font-size: 12px; }
+
+@media (max-width: 780px) {
+    .np-head { align-items: flex-start; flex-direction: column; }
+    .np-import { flex-direction: column; align-items: flex-start; }
+}
