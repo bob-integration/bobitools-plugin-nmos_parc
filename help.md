@@ -17,6 +17,27 @@ identiques** (`nmos_grid`, `nmos_diag`, `ptp_watch`, `config_backup`) : le jour 
 constructeur change sa disposition de ports, il fallait corriger quatre fois et espérer
 n'en oublier aucun. Elle vit désormais ici, une seule fois.
 
+## Qui fait quoi dans la famille NMOS
+
+Six outils partagent ce parc. Ils ne se recouvrent pas — chacun répond à une question
+différente, et c'est ce qui explique qu'ils soient restés séparés plutôt que fondus en un
+seul écran à onglets :
+
+| Outil | La question à laquelle il répond |
+|---|---|
+| **Parc NMOS** | *Quels équipements avons-nous, et lesquels répondent ?* |
+| **Grille NMOS** | *Qui envoie quoi à qui ?* — routage des flux, salvos, instantanés |
+| **Diagnostic NMOS 2110** | *Pourquoi cet abonnement ne marche-t-il pas ?* — croise NMOS et table IGMP du switch |
+| **Supervision NMOS (BCP-008)** | *Est-ce que quelque chose va mal, là, maintenant ?* — état continu, par abonnement IS-12 |
+| **Supervision PTP** | *Tout le monde est-il verrouillé sur le même grandmaster ?* |
+| **Sauvegarde de configs** | *Est-ce que tout est sauvegardé ?* |
+
+S'y ajoute **Convertisseurs Blackmagic**, qui ne gère plus d'inventaire : il ne sert qu'au
+détail par cage et à l'activation des envois de ces machines.
+
+Trois gestes différents, faits par des gens différents, à des moments différents : router,
+dépanner, surveiller. Ce qu'ils avaient en commun — la liste des équipements — est ici.
+
 ## Déclarer
 
 Trois formes, à choisir selon ce dont vous disposez :
