@@ -20,10 +20,6 @@
 .np-tally.np-bad { border-color: var(--status-stopped-fg); color: var(--status-stopped-fg); }
 .np-tally.np-neutral { border-color: var(--border); color: var(--text-muted); }
 
-/* ── Bandeau de reprise ──────────────────────────────────────────── */
-.np-import { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.np-import p { margin: 4px 0 0; font-size: 12px; opacity: 0.9; }
-
 /* ── Panneaux ────────────────────────────────────────────────────── */
 .np-panel {
     background: var(--bg-elev); border: 1px solid var(--border);
@@ -96,5 +92,4 @@
 
 @media (max-width: 780px) {
     .np-head { align-items: flex-start; flex-direction: column; }
-    .np-import { flex-direction: column; align-items: flex-start; }
 }

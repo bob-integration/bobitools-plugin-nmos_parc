@@ -1,8 +1,23 @@
 {
-  "current": "0.1.0",
+  "current": "0.3.0",
   "versions": [
     {
-      "version": "0.1.0",
+      "version": "0.3.0",
+      "published_at": "2026-08-06",
+      "changes": [
+        "Migration digérée : la reprise des inventaires existants et son bandeau sont retirés — la reprise a eu lieu, un outil ne garde pas une action de migration une fois qu'elle est faite",
+        "Les trois montages transitoires (/bmd, /legacy/grid, /legacy/diag) quittent le manifeste : le propriétaire du parc ne monte plus le volume de ses propres consommateurs, cette dépendance était inversée",
+        "Les identités d'origine (origins) et les clés historiques (compat) RESTENT publiées : c'est ce qui garde valides les salvos, instantanés et sauvegardes archivées des consommateurs"
+      ],
+      "fixes": [],
+      "known_bugs": [
+        "Le gabarit « auto » publie la borne haute (16 nodes) et laisse le sondage marquer les cages vides : la vraie auto-découverte par scan n'est pas encore faite",
+        "Un parc installé sur une instance neuve ne sait plus reprendre d'inventaire existant : la ressaisie est manuelle (0.2.0 reste dans versions/ si besoin)",
+        "Pas de découverte DNS-SD"
+      ]
+    },
+    {
+      "version": "0.2.0",
       "published_at": "2026-08-04",
       "changes": [
         "Propriétaire du parc NMOS : source de vérité unique des équipements IS-04, publiée dans son volume et consommée en lecture seule par les autres outils NMOS",

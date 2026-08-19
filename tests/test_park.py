@@ -1,24 +1,16 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Banc d'essai du « Parc NMOS » : expansion des gabarits, sondage, publication du contrat,
-# et reprise du parc bmd_nmos. Tourne dans l'image du plugin, sans matériel.
+# Banc d'essai du « Parc NMOS » : expansion des gabarits, sondage, publication du contrat
+# et clés de compatibilité. Tourne dans l'image du plugin, sans matériel.
 import json
 import os
 import shutil
 import sys
-import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = "/tmp/bt-nmosparc-data"
-BMD = "/tmp/bt-nmosparc-bmd"
-GRID = "/tmp/bt-nmosparc-grid"
-DIAG = "/tmp/bt-nmosparc-diag"
-for d in (DATA, BMD, GRID, DIAG):
-    shutil.rmtree(d, ignore_errors=True)
-    os.makedirs(d)
+shutil.rmtree(DATA, ignore_errors=True)
+os.makedirs(DATA)
 os.environ["DATA_DIR"] = DATA
-os.environ["BMD_DIR"] = BMD
-os.environ["GRID_DIR"] = GRID
-os.environ["DIAG_DIR"] = DIAG
 
 sys.path.insert(0, "/app")
 sys.path.insert(0, HERE)
@@ -42,47 +34,23 @@ def check(label, cond, detail=""):
         FAIL.append(label)
 
 
-print("── Reprise des inventaires existants ──")
-# On fabrique les inventaires tels qu'ils existent en production.
+print("── Parc hérité de la migration ──")
+# Le parc tel qu'il est APRÈS la reprise des inventaires d'avant (machinerie retirée en
+# 0.3.0). Ce qu'elle a laissé, et qui compte encore, ce sont les identités d'origine :
+# le node 127.0.0.1:8235 en porte DEUX — il était déclaré dans la grille ET dans le
+# diagnostic, avec des identifiants différents, et n'a donné qu'une source.
 json.dump([
-    {"id": "aaa", "name": "Conv régie 1", "host": "127.0.0.1", "model": "8x12G"},
-    {"id": "bbb", "name": "Conv régie 2", "host": "10.9.9.9", "model": "8x12G"},
-], open(os.path.join(BMD, "devices.json"), "w"))
-json.dump({
-    "auto": {"label": "Auto", "base_port": 8090, "step": 2, "count": None},
-    "8x12G": {"label": "2110 IP Converter 8x12G SFP", "base_port": 8090, "step": 2, "count": 4},
-}, open(os.path.join(BMD, "models.json"), "w"))
-# Le MÊME équipement manuel déclaré dans les deux outils, avec des identifiants DIFFÉRENTS :
-# c'est le cas qui doit fusionner en une source portant les deux identités.
-json.dump([{"id": "g1", "name": "Node partagé", "host": "127.0.0.1", "port": 8235},
-           {"id": "g2", "name": "Node grille seul", "host": "10.8.8.8", "port": 80}],
-          open(os.path.join(GRID, "targets.json"), "w"))
-json.dump([{"id": "d1", "name": "Node partagé", "host": "127.0.0.1", "port": 8235}],
-          open(os.path.join(DIAG, "targets.json"), "w"))
-bmd_before = open(os.path.join(BMD, "devices.json")).read()
-grid_before = open(os.path.join(GRID, "targets.json")).read()
-
-avail = park.legacy_available()
-check("trois inventaires détectés", set(avail) == {"bmd_nmos", "nmos_grid", "nmos_diag"}, str(avail))
-res = park.import_legacy()
-check("2 machines + 2 nodes repris", res["imported"] == {"bmd_nmos": 2, "nmos_grid": 2, "nmos_diag": 0},
-      json.dumps(res))
-check("gabarit 8x12G repris", "8x12G" in park.load_templates())
-check("rien écrit dans /bmd (inventaire de l'utilisateur)",
-      open(os.path.join(BMD, "devices.json")).read() == bmd_before)
-check("rien écrit dans /legacy/grid",
-      open(os.path.join(GRID, "targets.json")).read() == grid_before)
-
-srcs = park.load_sources()
-check("4 sources au total (le node partagé n'est pas dupliqué)", len(srcs) == 4, str(len(srcs)))
-shared = [s for s in srcs if s.get("host") == "127.0.0.1" and s.get("kind") == "node"]
-check("le node partagé porte les DEUX identités",
-      len(shared) == 1 and shared[0]["origins"] == {"nmos_grid": "g1", "nmos_diag": "d1"},
-      json.dumps(shared[0]["origins"]) if shared else "absent")
-
-again = park.import_legacy()
-check("reprise NON rejouée", again["skipped"] is True, json.dumps(again))
-check("toujours 4 sources", len(park.load_sources()) == 4)
+    {"id": "aaa", "kind": "machine", "name": "Conv régie 1", "host": "127.0.0.1",
+     "template": "8x12G", "vendor": "blackmagic", "origins": {"bmd_nmos": "aaa"}},
+    {"id": "bbb", "kind": "machine", "name": "Conv régie 2", "host": "10.9.9.9",
+     "template": "8x12G", "vendor": "blackmagic", "origins": {"bmd_nmos": "bbb"}},
+    {"id": "n01", "kind": "node", "name": "Node partagé", "host": "127.0.0.1", "port": 8235,
+     "origins": {"nmos_grid": "g1", "nmos_diag": "d1"}},
+    {"id": "n02", "kind": "node", "name": "Node grille seul", "host": "10.8.8.8", "port": 80,
+     "origins": {"nmos_grid": "g2"}},
+], open(os.path.join(DATA, "sources.json"), "w"))
+check("4 sources déclarées", len(park.load_sources()) == 4, str(len(park.load_sources())))
+check("gabarit 8x12G livré d'origine", "8x12G" in park.load_templates())
 
 print("\n── Clés historiques (compatibilité des données enregistrées) ──")
 # Sans ces clés, tous les salvos et instantanés de nmos_grid deviendraient orphelins.

@@ -9,8 +9,7 @@ WORKDIR /app
 COPY server.py park.py nmos.py /app/
 
 # /data : sources déclarées, gabarits, et park.json — le contrat publié aux autres outils.
-# /bmd (ro) : parc de bmd_nmos, monté UNIQUEMENT pour la reprise initiale. Ce montage
-# disparaîtra quand bmd_nmos sera lui-même devenu consommateur du parc.
+# Seul volume monté : cet outil ne lit plus l'inventaire de personne, il le détient.
 VOLUME ["/data"]
 
 # Port HTTP interne — DOIT correspondre à docker.port du plugin.json.

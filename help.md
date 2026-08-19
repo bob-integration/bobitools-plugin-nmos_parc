@@ -56,16 +56,13 @@ L'écran distingue volontairement deux plans, qu'il ne faut pas confondre :
 - **Sources déclarées** — ce que vous avez saisi. Une machine = **une** ligne.
 - **Parc publié** — ce que ça donne après expansion. Une machine = **N** lignes, une par cage.
 
-## Reprendre les inventaires existants
+## Les clés historiques
 
 Trois outils détenaient un inventaire avant la bascule : `bmd_nmos` (les châssis Blackmagic),
-`nmos_grid` et `nmos_diag` (leurs nodes manuels). Un bandeau propose de les reprendre sans
-ressaisie. La reprise est **non destructive** : on lit leurs volumes, on n'y écrit jamais, et
-elle ne se rejoue pas.
-
-Le dédoublonnage se fait sur l'**adresse**, pas sur l'identifiant. Le même équipement déclaré
-à la fois dans la grille et dans le diagnostic donne donc **une** source, portant les **deux**
-identités d'origine.
+`nmos_grid` et `nmos_diag` (leurs nodes manuels). Leur reprise a eu lieu une fois pour toutes
+et la machinerie qui la faisait a été retirée en 0.3.0 ; ce qu'elle a laissé derrière elle
+reste, en revanche, essentiel : chaque source porte ses **identités d'origine** (`origins`),
+d'où sont dérivées les clés que ses consommateurs utilisaient déjà.
 
 C'est ce qui rend la migration invisible côté données. Chaque outil indexait ses
 enregistrements sur sa propre clé :
@@ -83,9 +80,10 @@ d'origine dans `origins`. C'est une **couche de compatibilité assumée**, pas u
 modèle : le jour où plus aucun enregistrement ne référencera d'ancienne clé, `compat`
 disparaîtra du contrat.
 
-Les montages `/bmd`, `/legacy/grid` et `/legacy/diag` sont **transitoires** : ils
-correspondent à l'ancien sens de dépendance et quitteront le manifeste une fois la migration
-digérée.
+Les montages `/bmd`, `/legacy/grid` et `/legacy/diag` ont quitté le manifeste en 0.3.0 : ils
+correspondaient à l'ancien sens de dépendance — le propriétaire du parc lisant le volume de
+ses propres consommateurs — et n'existaient que le temps de la reprise. Cet outil ne monte
+plus que son propre volume.
 
 ## Ce que voit un point d'entrée injoignable
 
@@ -148,5 +146,5 @@ disponibilité du propriétaire.
 ```
 
 Ouvre plusieurs nodes NMOS factices — dont un châssis à quatre cages avec une cage vide — et
-vérifie l'expansion des gabarits, le sondage, le contrat publié, la reprise des trois
-inventaires existants (avec fusion des doublons) et la conservation des clés historiques.
+vérifie l'expansion des gabarits, le sondage, le contrat publié et la dérivation des clés
+historiques (`compat`) à partir des identités d'origine.

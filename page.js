@@ -29,7 +29,6 @@ window.BTTools.nmos_parc = (function () {
         $("#np-f-cancel").addEventListener("click", () => { $("#np-form").hidden = true; });
         $("#np-f-kind").addEventListener("change", onKindChange);
         $("#np-form").addEventListener("submit", onAdd);
-        $("#np-import-btn").addEventListener("click", doImport);
         $("#np-only-down").addEventListener("change", renderPark);
         $("#np-sources").addEventListener("click", onSourceClick);
         $("#np-tbody").addEventListener("click", onRowClick);
@@ -66,16 +65,6 @@ window.BTTools.nmos_parc = (function () {
         renderSources();
         renderPark();
         renderTemplates();
-        // La reprise ne se propose que pour les outils dont l'inventaire n'a pas encore
-        // été repris : un bandeau qui reste après coup laisserait croire à un travail en
-        // attente alors qu'il est fait.
-        const legacy = state.legacy || {}, imported = state.imported || {};
-        const pending = Object.keys(legacy).filter((t) => !(t in imported));
-        $("#np-import").hidden = pending.length === 0;
-        if (pending.length) {
-            $("#np-import-list").textContent = pending
-                .map((t) => `${t} (${legacy[t]})`).join(", ");
-        }
         const at = state.updated_at ? new Date(state.updated_at * 1000).toLocaleTimeString() : "—";
         $("#np-updated").textContent = tr("plugin.nmos_parc.lastProbe", "dernier sondage") + " : " + at;
     }
@@ -238,16 +227,6 @@ window.BTTools.nmos_parc = (function () {
     async function doRefresh() {
         try {
             await ctx.api("refresh", { method: "POST", body: {} });
-            poll();
-        } catch (e) { ctx.toast(String(e.message || e), "error"); }
-    }
-
-    async function doImport() {
-        try {
-            const r = await ctx.api("import/legacy", { method: "POST", body: {} });
-            ctx.toast(r.skipped
-                ? tr("plugin.nmos_parc.importSkipped", "Inventaires déjà repris")
-                : `${r.total} ${tr("plugin.nmos_parc.importOk", "source(s) reprise(s)")}`, "success");
             poll();
         } catch (e) { ctx.toast(String(e.message || e), "error"); }
     }

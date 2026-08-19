@@ -31,16 +31,9 @@ from nmos import Is04Source, NmosError, probe_node
 
 DATA_DIR = os.environ.get("DATA_DIR", "/data")
 
-LEGACY_DIRS = {          # volumes des outils d'où l'on reprend l'existant (transitoire)
-    "bmd_nmos": os.environ.get("BMD_DIR", "/bmd"),
-    "nmos_grid": os.environ.get("GRID_DIR", "/legacy/grid"),
-    "nmos_diag": os.environ.get("DIAG_DIR", "/legacy/diag"),
-}
-
 SOURCES_FILE = os.path.join(DATA_DIR, "sources.json")
 TEMPLATES_FILE = os.path.join(DATA_DIR, "templates.json")
 PARK_FILE = os.path.join(DATA_DIR, "park.json")
-IMPORT_FILE = os.path.join(DATA_DIR, "imported.json")
 
 PARK_VERSION = 1        # version du contrat publié — à incrémenter si le schéma change
 REFRESH_INTERVAL = 60   # s entre deux sondages de joignabilité
@@ -197,122 +190,6 @@ def _expand_machine(s, templates):
         entry["compat"] = compat_keys(entry, s)
         out.append(entry)
     return out
-
-
-# ── Reprise de l'existant (transitoire) ────────────────────────────────────────
-
-def legacy_available():
-    """Outils dont le volume est monté et porte un inventaire à reprendre.
-
-    Ces montages n'existent QUE pour la reprise : c'est l'ancien sens de dépendance,
-    conservé le temps que chaque outil devienne consommateur du parc. Ils disparaîtront
-    des manifestes une fois la migration digérée.
-    """
-    out = {}
-    devices = os.path.join(LEGACY_DIRS["bmd_nmos"], "devices.json")
-    if os.path.exists(devices):
-        out["bmd_nmos"] = len(_read(devices, []) or [])
-    for tool in ("nmos_grid", "nmos_diag"):
-        path = os.path.join(LEGACY_DIRS[tool], "targets.json")
-        if os.path.exists(path):
-            out[tool] = len(_read(path, []) or [])
-    return out
-
-
-def _machine_for(host, template, sources):
-    for s in sources:
-        if s.get("kind") == "machine" and s.get("host") == host and s.get("template") == template:
-            return s
-    return None
-
-
-def _node_for(host, port, sources):
-    for s in sources:
-        if s.get("kind") == "node" and s.get("host") == host and int(s.get("port") or 0) == port:
-            return s
-    return None
-
-
-def import_legacy(force=False):
-    """Reprend l'inventaire des outils qui le détenaient avant. Non destructif.
-
-    On LIT leurs volumes, on n'y écrit jamais : l'inventaire d'un utilisateur est sacré.
-    La reprise ne se rejoue pas (sauf `force`, qui se contente d'ajouter ce qui manque).
-
-    Le dédoublonnage se fait sur l'ADRESSE, pas sur l'identifiant : le même équipement
-    déclaré à la fois dans `nmos_grid` et dans `nmos_diag` doit donner UNE source, portant
-    les DEUX identités d'origine — c'est ce qui permet à chacun des deux outils de
-    retrouver ses données enregistrées après la migration (cf. compat_keys).
-    """
-    done = _read(IMPORT_FILE, {})
-    report = {}
-    sources = load_sources()
-    changed = False
-
-    # ── bmd_nmos : des machines multi-cages, avec leurs gabarits ──
-    if "bmd_nmos" not in done or force:
-        devices = _read(os.path.join(LEGACY_DIRS["bmd_nmos"], "devices.json"), [])
-        models = _read(os.path.join(LEGACY_DIRS["bmd_nmos"], "models.json"), {}) or {}
-        templates = load_templates()
-        for name, m in (models or {}).items():
-            if name not in templates and isinstance(m, dict):
-                templates[name] = {"label": m.get("label") or name,
-                                   "base_port": m.get("base_port") or 8090,
-                                   "step": m.get("step") or 2, "count": m.get("count"),
-                                   "vendor": "blackmagic"}
-        save_templates(templates)
-        added = 0
-        for d in devices if isinstance(devices, list) else []:
-            if not isinstance(d, dict) or not d.get("host"):
-                continue
-            tpl = d.get("model") or "auto"
-            existing = _machine_for(d["host"], tpl, sources)
-            if existing:
-                existing.setdefault("origins", {}).setdefault("bmd_nmos", d.get("id"))
-                changed = True
-                continue
-            sources.append({
-                "id": uuid.uuid4().hex[:8], "kind": "machine",
-                "name": d.get("name") or d.get("host"), "host": d["host"],
-                "template": tpl, "base_port": d.get("base_port"), "vendor": "blackmagic",
-                "origins": {"bmd_nmos": d.get("id")},
-            })
-            added += 1
-            changed = True
-        report["bmd_nmos"] = added
-        done["bmd_nmos"] = time.time()
-
-    # ── nmos_grid / nmos_diag : des nodes déclarés à la main ──
-    for tool in ("nmos_grid", "nmos_diag"):
-        if tool in done and not force:
-            continue
-        targets = _read(os.path.join(LEGACY_DIRS[tool], "targets.json"), [])
-        added = 0
-        for t in targets if isinstance(targets, list) else []:
-            if not isinstance(t, dict) or not t.get("host"):
-                continue
-            port = int(t.get("port") or 80)
-            existing = _node_for(t["host"], port, sources)
-            if existing:
-                existing.setdefault("origins", {}).setdefault(tool, t.get("id"))
-                changed = True
-                continue
-            sources.append({
-                "id": uuid.uuid4().hex[:8], "kind": "node",
-                "name": t.get("name") or f"{t['host']}:{port}",
-                "host": t["host"], "port": port, "vendor": "",
-                "origins": {tool: t.get("id")},
-            })
-            added += 1
-            changed = True
-        report[tool] = added
-        done[tool] = time.time()
-
-    if changed:
-        save_sources(sources)
-    with _io_lock:
-        _write(IMPORT_FILE, done)
-    return {"imported": report, "total": sum(report.values()), "skipped": not report}
 
 
 # ── Sondage et publication ─────────────────────────────────────────────────────

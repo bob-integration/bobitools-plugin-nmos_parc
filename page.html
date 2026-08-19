@@ -12,21 +12,6 @@
     </div>
   </div>
 
-  <!-- Reprise de l'existant. N'apparaît que pour les outils dont l'inventaire n'a pas
-       encore été repris : c'est une action de migration, pas une fonction permanente. -->
-  <div class="alert alert-info np-import" id="np-import" hidden>
-    <div>
-      <b data-i18n="plugin.nmos_parc.importTitle">Reprendre les inventaires existants</b>
-      <p data-i18n="plugin.nmos_parc.importHint">
-        Les équipements déjà déclarés dans les autres outils NMOS peuvent être repris ici
-        sans ressaisie, en conservant leurs identités : les salvos, instantanés et
-        sauvegardes enregistrés continuent de fonctionner. Rien n'est modifié chez eux.
-      </p>
-      <p class="np-sub" id="np-import-list"></p>
-    </div>
-    <button class="btn btn-sm btn-green" id="np-import-btn" data-i18n="plugin.nmos_parc.importBtn">Reprendre</button>
-  </div>
-
   <!-- Déclaration. Trois types, dont deux qui n'ont pas les mêmes champs : le formulaire
        s'adapte plutôt que d'afficher des champs sans objet. -->
   <form class="np-form" id="np-form" hidden>

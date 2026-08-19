@@ -59,8 +59,6 @@ class Handler(BaseHTTPRequestHandler):
                 st = PARK.state()
                 st["sources"] = park.load_sources()
                 st["templates"] = park.load_templates()
-                st["legacy"] = park.legacy_available()
-                st["imported"] = park._read(park.IMPORT_FILE, {})
                 return self._send(200, st)
             if parts == ["templates"]:
                 return self._send(200, {"templates": park.load_templates()})
@@ -91,12 +89,6 @@ class Handler(BaseHTTPRequestHandler):
             if parts == ["refresh"]:
                 PARK.refresh()
                 return self._send(200, {"ok": True})
-            if parts == ["import", "legacy"]:
-                if not park.legacy_available():
-                    return self._send(409, {"error": "aucun inventaire à reprendre"})
-                res = park.import_legacy(force=bool(body.get("force")))
-                PARK.refresh()
-                return self._send(200, res)
             return self._send(404, {"error": "route inconnue"})
         except Exception as e:  # noqa: BLE001
             return self._send(500, {"error": str(e)})
